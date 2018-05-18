@@ -1530,7 +1530,7 @@ uis.directive('uiSelectMatch', ['uiSelectConfig', function(uiSelectConfig) {
   }
 }]);
 
-uis.directive('uiSelectMultiple', ['uiSelectMinErr','$timeout', function(uiSelectMinErr, $timeout) {
+uis.directive('uiSelectMultiple', ['uiSelectMinErr','$timeout', '$$uisDebounce', function(uiSelectMinErr, $timeout, $$uisDebounce) {
   return {
     restrict: 'EA',
     require: ['^uiSelect', '^ngModel'],
@@ -1817,7 +1817,7 @@ uis.directive('uiSelectMultiple', ['uiSelectMinErr','$timeout', function(uiSelec
         return true;
       }
 
-      $select.searchInput.on('keyup', function(e) {
+      var setTagChoices = $$uisDebounce(function(e) {
 
         if ( ! KEY.isVerticalMovement(e.which) ) {
           scope.$evalAsync( function () {
@@ -1941,7 +1941,10 @@ uis.directive('uiSelectMultiple', ['uiSelectMinErr','$timeout', function(uiSelec
             }
           });
         }
-      });
+      }, 300);
+
+      $select.searchInput.on('keyup focus', setTagChoices);
+
       function _findCaseInsensitiveDupe(arr) {
         if ( arr === undefined || $select.search === undefined ) {
           return false;
